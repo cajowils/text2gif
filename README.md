@@ -15,13 +15,17 @@ This project is similar to what you might find on a GIF search on a social media
 We were able to use MIT Media Lab’s GIFGIF API to retrieve emotion scores (amusement, anger, happiness, sadness, etc) for thousands of GIFs. We then built a recurrent neural network that performed emotion analysis on two different datasets with labels mapped to various tweets and sentences. 
 
 Our recurrent neural network consisted of an embedding layer that was trained on our data, two Gated Recurrent Units (GRU; similar to Long Short-Term Memory layers but generally more efficient) with 128 nodes each, and a Dense layer output with 7 nodes for each of our emotion classes (sadness, worry, surprise, love, hate, happiness, neutral).
+
 ![](/assets/model_architecture.png)
+
 We attempted to use a Bidirectional layer to implement attention to our model, but we found that performance decreased for some reason. We also attempted to use pre-trained GloVe twitter word embeddings as our embedding layer, but this also decreased performance.
 
 Before training the neural network we had to do a bit of preprocessing, which involved mapping the labeled emotions between the datasets, tokenization, lemmatization, padding, and converting the data to a tensor format. For the mapping of emotions we equated joy to happiness, anger to hate, and fear to worry. Similarly, when pulling GIFs from the GIFGIF API we mapped love to contentment, since the GIFs in that category were the closest representation to love we could find. There are definitely some drawbacks to this methodology, however we wanted to keep as many categories of emotions as possible, so that our emotion classifier would have a broad enough range of emotions to predict.
 
 One problem we discovered in our initial training of the model was that it was predicting the majority classes much more often than the minority classes as a strategy of minimizing its loss function.
+
 ![](/assets/class_imbalance.png)
+
 As you can see in the top plot, our original tweet dataset had very few samples that were labeled as hate or surprise. When we tested our original model on new samples such as “my cat is so annoying I hate her”, it misclassified them as one of the majority classes such as neutral, worry, sadness, or happiness. Our first method to solve this issue was to undersample our dataset, taking a randomly sampled dataset that included about 1000 samples per emotion. This solved our problem of minority classes being ignored, at the cost of losing lots of valuable data.
 
  Our second method to solve this issue was to collect more data to balance out our classes. We added a text dataset which had many sentences in a format akin to “i am feeling ____”. As shown above, combining these two datasets somewhat balanced our classes, but surprise and hate still lacked the amount of samples as our other classes.
